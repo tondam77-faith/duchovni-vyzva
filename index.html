@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Následování</title>
     
+    <!-- Propojení s PWA Manifestem -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#27ae60">
     
+    <!-- Specifické značky pro Apple / iOS pro skrytí URL adresy -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -25,6 +27,15 @@
                 <h1 id="today-date">Dnešní cesta</h1>
                 <p class="subtitle">Soustřeď se na přítomný okamžik</p>
             </header>
+            
+            <!-- Tlačítko pro Lectio Divina / Posvátný prostor -->
+            <div class="card" style="background: var(--success-bg); border: 1px solid var(--success-color);">
+                <h3 style="margin-top:0; color:var(--text-main);">Lectio Divina</h3>
+                <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 12px;">Dnešní modlitba s Biblí na webu Posvátný prostor.</p>
+                <a href="https://www.posvatnyprostor.cz/" target="_blank" style="text-decoration:none;">
+                    <button style="background: var(--color-modlitba);">Otevřít zamyšlení</button>
+                </a>
+            </div>
             
             <div id="habits-list"></div>
 
@@ -133,14 +144,11 @@
 
     <script src="app.js"></script>
     
-    <!-- REGISTRACE SERVICE WORKERA PRO OFFLINE A PWA REŽIM -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js').then(reg => {
             console.log('Service Worker zaregistrován.', reg);
-          }).catch(err => {
-            console.log('Service Worker registrace selhala: ', err);
           });
         });
       }
