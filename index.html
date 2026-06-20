@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exodus & Návyky</title>
+    <!-- Propojení s PWA Manifestem -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#27ae60">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main id="app-content">
+        
+        <section id="tab-today" class="app-tab active">
+            <header class="tab-header">
+                <h1 id="today-date">Dnešní cesta</h1>
+                <p class="subtitle">Soustřeď se na přítomný okamžik</p>
+            </header>
+            
+            <div id="habits-list"></div>
+
+            <div id="reflection-section" class="hidden">
+                <h2>Večerní ztišení</h2>
+                <p class="reflection-intro">Pro dnešek máš splněno. Zastav se a ohlédni se za uplynulým dnem bez odsuzování.</p>
+                
+                <div class="input-group">
+                    <label for="input-reflection">S čím jsem dnes bojoval?</label>
+                    <textarea id="input-reflection" rows="3" placeholder="Zapiš své vnitřní překážky nebo uvědomění..."></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="input-gratitude">Za co jsem dnes vděčný?</label>
+                    <textarea id="input-gratitude" rows="3" placeholder="Vykaž vděčnost za dnešní dary a milosti..."></textarea>
+                </div>
+                
+                <button id="btn-save-day" onclick="saveTodayLog()">Uzavřít den s laskavostí</button>
+            </div>
+        </section>
+
+        <section id="tab-calendar" class="app-tab">
+            <header class="tab-header">
+                <h1>Tvoje Cesta</h1>
+                <p class="subtitle">Vizuální důkaz tvé vytrvalosti</p>
+            </header>
+            
+            <div class="calendar-container">
+                <h3 id="calendar-month-year"></h3>
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+            
+            <div id="day-detail-container" class="hidden">
+                <h3 id="detail-date">Detail dne</h3>
+                <div id="detail-habits"></div>
+                <p id="detail-reflection"></p>
+                <p id="detail-gratitude"></p>
+            </div>
+        </section>
+
+        <section id="tab-settings" class="app-tab">
+            <header class="tab-header">
+                <h1>Správa Návyků</h1>
+                <p class="subtitle">Učiň své návyky snadné a nápadné</p>
+            </header>
+
+            <div class="card form-card">
+                <h3>+ Nový návyk / Úprava</h3>
+                <div class="input-group">
+                    <label for="new-habit-name">Název aktivity</label>
+                    <input type="text" id="new-habit-name" placeholder="Např. 20 minut tiché modlitby">
+                </div>
+                <div class="input-group">
+                    <label for="new-habit-category">Pilíř cvičení</label>
+                    <select id="new-habit-category">
+                        <option value="modlitba">Modlitba</option>
+                        <option value="askeze">Askeze / Pokání</option>
+                        <option value="spolecenstvi">Bratrství / Společenství</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="new-habit-trigger">Spouštěč (Kdy a po čem to uděláš)</label>
+                    <input type="text" id="new-habit-trigger" placeholder="Např. Poté, co vstanu a umyji si obličej">
+                </div>
+                
+                <div class="input-group">
+                    <label>Dny v týdnu (všechny = každodenní rutina)</label>
+                    <div class="days-selector">
+                        <label><input type="checkbox" class="day-checkbox" value="1" checked> Po</label>
+                        <label><input type="checkbox" class="day-checkbox" value="2" checked> Út</label>
+                        <label><input type="checkbox" class="day-checkbox" value="3" checked> St</label>
+                        <label><input type="checkbox" class="day-checkbox" value="4" checked> Čt</label>
+                        <label><input type="checkbox" class="day-checkbox" value="5" checked> Pá</label>
+                        <label><input type="checkbox" class="day-checkbox" value="6" checked> So</label>
+                        <label><input type="checkbox" class="day-checkbox" value="0" checked> Ne</label>
+                    </div>
+                </div>
+
+                <button id="btn-save-habit" onclick="saveHabit()">Přidat do svého plánu</button>
+            </div>
+
+            <div class="card list-card">
+                <h3>Moje aktuální návyky</h3>
+                <div id="manage-habits-list"></div>
+            </div>
+
+            <!-- Sekce pro Zálohování a Obnovu -->
+            <div class="card form-card">
+                <h3>Záloha a obnova dat</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Ulož si svá data do souboru, nebo je obnov z předchozí zálohy.</p>
+                <div style="display: flex; gap: 8px; flex-direction: column;">
+                    <button onclick="exportData()" style="background: var(--color-modlitba);">Exportovat (Záloha do JSON)</button>
+                    <button onclick="document.getElementById('import-file').click()" style="background: var(--color-askeze);">Importovat (Obnova ze souboru)</button>
+                    <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <button class="nav-btn active" id="btn-tab-today" onclick="switchTab('today')">
+            <span class="nav-icon">✓</span>
+            <span class="nav-text">Dnes</span>
+        </button>
+        <button class="nav-btn" id="btn-tab-calendar" onclick="switchTab('calendar')">
+            <span class="nav-icon">📅</span>
+            <span class="nav-text">Kalendář</span>
+        </button>
+        <button class="nav-btn" id="btn-tab-settings" onclick="switchTab('settings')">
+            <span class="nav-icon">⚙</span>
+            <span class="nav-text">Nastavení</span>
+        </button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
