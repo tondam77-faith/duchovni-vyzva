@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Exodus & Návyky</title>
+    <title>Exodus</title>
     
-    <!-- Propojení s PWA Manifestem -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#27ae60">
     
-    <!-- Specifické značky pro Apple / iOS pro skrytí URL adresy -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -36,12 +34,12 @@
                 
                 <div class="input-group">
                     <label for="input-reflection">S čím jsem dnes bojoval?</label>
-                    <textarea id="input-reflection" rows="3" placeholder="Zapiš své vnitřní překážky nebo uvědomění..."></textarea>
+                    <textarea id="input-reflection" rows="3" placeholder="Zapiš své vnitřní překážky..."></textarea>
                 </div>
                 
                 <div class="input-group">
                     <label for="input-gratitude">Za co jsem dnes vděčný?</label>
-                    <textarea id="input-gratitude" rows="3" placeholder="Vykaž vděčnost za dnešní dary a milosti..."></textarea>
+                    <textarea id="input-gratitude" rows="3" placeholder="Vykaž vděčnost..."></textarea>
                 </div>
                 
                 <button id="btn-save-day" onclick="saveTodayLog()">Uzavřít den s laskavostí</button>
@@ -53,12 +51,10 @@
                 <h1>Tvoje Cesta</h1>
                 <p class="subtitle">Vizuální důkaz tvé vytrvalosti</p>
             </header>
-            
             <div class="calendar-container">
                 <h3 id="calendar-month-year"></h3>
                 <div class="calendar-grid" id="calendar-grid"></div>
             </div>
-            
             <div id="day-detail-container" class="hidden">
                 <h3 id="detail-date">Detail dne</h3>
                 <div id="detail-habits"></div>
@@ -72,7 +68,6 @@
                 <h1>Správa Návyků</h1>
                 <p class="subtitle">Učiň své návyky snadné a nápadné</p>
             </header>
-
             <div class="card form-card">
                 <h3>+ Nový návyk / Úprava</h3>
                 <div class="input-group">
@@ -92,7 +87,6 @@
                     <label for="new-habit-trigger">Spouštěč (Kdy a po čem to uděláš)</label>
                     <input type="text" id="new-habit-trigger" placeholder="Např. Poté, co vstanu a umyji si obličej">
                 </div>
-                
                 <div class="input-group">
                     <label>Dny v týdnu (všechny = každodenní rutina)</label>
                     <div class="days-selector">
@@ -105,27 +99,21 @@
                         <label><input type="checkbox" class="day-checkbox" value="0" checked> Ne</label>
                     </div>
                 </div>
-
                 <button id="btn-save-habit" onclick="saveHabit()">Přidat do svého plánu</button>
             </div>
-
             <div class="card list-card">
                 <h3>Moje aktuální návyky</h3>
                 <div id="manage-habits-list"></div>
             </div>
-
             <div class="card form-card">
                 <h3>Záloha a obnova dat</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Ulož si svá data do souboru, nebo je obnov z předchozí zálohy.</p>
                 <div style="display: flex; gap: 8px; flex-direction: column;">
                     <button onclick="exportData()" style="background: var(--color-modlitba);">Exportovat (Záloha do JSON)</button>
                     <button onclick="document.getElementById('import-file').click()" style="background: var(--color-askeze);">Importovat (Obnova ze souboru)</button>
                     <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importData(event)">
                 </div>
             </div>
-
         </section>
-
     </main>
 
     <nav class="bottom-nav">
@@ -144,5 +132,18 @@
     </nav>
 
     <script src="app.js"></script>
+    
+    <!-- REGISTRACE SERVICE WORKERA PRO OFFLINE A PWA REŽIM -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').then(reg => {
+            console.log('Service Worker zaregistrován.', reg);
+          }).catch(err => {
+            console.log('Service Worker registrace selhala: ', err);
+          });
+        });
+      }
+    </script>
 </body>
 </html>
