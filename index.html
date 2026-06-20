@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exodus & Návyky</title>
-    <!-- Propojení s PWA Manifestem -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#27ae60">
     <link rel="stylesheet" href="style.css">
@@ -71,11 +70,12 @@
                     <input type="text" id="new-habit-name" placeholder="Např. 20 minut tiché modlitby">
                 </div>
                 <div class="input-group">
-                    <label for="new-habit-category">Pilíř cvičení</label>
+                    <label for="new-habit-category">Kategorie</label>
                     <select id="new-habit-category">
                         <option value="modlitba">Modlitba</option>
                         <option value="askeze">Askeze / Pokání</option>
                         <option value="spolecenstvi">Bratrství / Společenství</option>
+                        <option value="dovednost">Dovednost / Osobní rozvoj</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -104,7 +104,6 @@
                 <div id="manage-habits-list"></div>
             </div>
 
-            <!-- Sekce pro Zálohování a Obnovu -->
             <div class="card form-card">
                 <h3>Záloha a obnova dat</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Ulož si svá data do souboru, nebo je obnov z předchozí zálohy.</p>

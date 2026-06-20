@@ -1,6 +1,5 @@
 
 :root {
-    /* Výchozí (Světlý) režim */
     --bg-color: #f4f6f8;
     --card-bg: #ffffff;
     --text-main: #2c3e50;
@@ -12,13 +11,13 @@
     --color-modlitba: #4a90e2;
     --color-askeze: #5d6d7e;
     --color-spolecenstvi: #d35400;
+    --color-dovednost: #9b59b6;
     
     --success-color: #27ae60;
     --success-bg: #e8f5e9;
     --calendar-empty: #e5e8e8;
 }
 
-/* Tmavý režim - detekce ze systému */
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-color: #121212;
@@ -32,6 +31,7 @@
         --color-modlitba: #5dade2; 
         --color-askeze: #85929e;
         --color-spolecenstvi: #e59866;
+        --color-dovednost: #af7ac5;
         
         --success-color: #2ecc71;
         --success-bg: #1b4f31;
@@ -54,12 +54,7 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-main {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
+main { max-width: 500px; margin: 0 auto; padding: 20px; }
 .tab-header { margin-bottom: 24px; }
 .tab-header h1 { font-size: 1.8rem; margin: 0 0 4px 0; color: var(--text-main); }
 .subtitle { color: var(--text-muted); font-style: italic; margin: 0; }
@@ -82,12 +77,9 @@ main {
 .habit-card.cat-modlitba { border-left-color: var(--color-modlitba); }
 .habit-card.cat-askeze { border-left-color: var(--color-askeze); }
 .habit-card.cat-spolecenstvi { border-left-color: var(--color-spolecenstvi); }
+.habit-card.cat-dovednost { border-left-color: var(--color-dovednost); }
 
-.habit-card.done {
-    opacity: 0.4;
-    background-color: var(--bg-color);
-    transform: scale(0.98);
-}
+.habit-card.done { opacity: 0.4; background-color: var(--bg-color); transform: scale(0.98); }
 
 .habit-info { margin-left: 16px; flex-grow: 1; }
 .habit-title { font-weight: 600; font-size: 1.05rem; margin: 0; color: var(--text-main); }
@@ -114,14 +106,8 @@ input[type="checkbox"] { width: 26px; height: 26px; accent-color: var(--success-
 .input-group { margin-bottom: 14px; }
 .input-group label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main); }
 input[type="text"], select, textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1rem;
-    background: var(--input-bg);
-    color: var(--text-main);
+    width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;
+    font-family: inherit; font-size: 1rem; background: var(--input-bg); color: var(--text-main);
 }
 input[type="text"]:focus, select:focus, textarea:focus { outline: none; border-color: var(--text-muted); }
 
@@ -138,9 +124,7 @@ button {
 }
 button:active { opacity: 0.8; }
 
-.manage-habit-item {
-    display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color);
-}
+.manage-habit-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
 .manage-habit-item:last-child { border-bottom: none; }
 .btn-toggle-status { width: auto; padding: 6px 12px; font-size: 0.85rem; background: #e74c3c; }
 .btn-toggle-status.paused { background: #34495e; }
@@ -155,13 +139,8 @@ button:active { opacity: 0.8; }
 .calendar-day-box.all-done { background-color: var(--success-color); color: white; }
 .calendar-day-box.some-done { background-color: var(--color-modlitba); color: white; }
 .calendar-day-box.none-done { background-color: #e74c3c; color: white; }
-@media (prefers-color-scheme: dark) {
-    .calendar-day-box.none-done { background-color: #922b21; }
-}
-
-.calendar-day-box.future-day {
-    background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); cursor: default;
-}
+@media (prefers-color-scheme: dark) { .calendar-day-box.none-done { background-color: #922b21; } }
+.calendar-day-box.future-day { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); cursor: default; }
 .calendar-day-box.future-day:active { transform: none; }
 
 .bottom-nav {

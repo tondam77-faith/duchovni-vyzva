@@ -1,4 +1,3 @@
-
 // Inicializace
 if (!localStorage.getItem('exodus_habits')) {
     const defaultHabits = [
@@ -252,7 +251,6 @@ function toggleHabitStatus(habitId) {
     }
 }
 
-// --- ZÁLOHOVÁNÍ A OBNOVA DAT ---
 function exportData() {
     const data = {
         habits: JSON.parse(localStorage.getItem('exodus_habits') || '[]'),
@@ -279,7 +277,7 @@ function importData(event) {
                 localStorage.setItem('exodus_habits', JSON.stringify(data.habits));
                 localStorage.setItem('exodus_logs', JSON.stringify(data.logs));
                 alert('Data byla úspěšně obnovena! Aplikace se nyní načte se starými záznamy.');
-                location.reload(); // Znovunačtení aplikace pro zobrazení obnovených dat
+                location.reload(); 
             } else {
                 alert('Zvolený soubor neobsahuje platná data pro tuto aplikaci.');
             }
