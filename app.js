@@ -1,3 +1,4 @@
+
 // Inicializace
 if (!localStorage.getItem('exodus_habits')) {
     const defaultHabits = [
