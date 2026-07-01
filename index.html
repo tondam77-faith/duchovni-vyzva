@@ -21,7 +21,6 @@
     <main id="app-content">
         
         <section id="tab-today" class="app-tab active">
-            <!-- Upravená hlavička se šipkami pro přesun v čase -->
             <header class="tab-header" style="display: flex; align-items: center; justify-content: space-between;">
                 <button onclick="changeDate(-1)" style="width: 40px; padding: 8px; background: transparent; color: var(--text-main); font-size: 1.8rem;">&lsaquo;</button>
                 <div style="text-align: center; flex-grow: 1;">
@@ -60,13 +59,18 @@
             </div>
         </section>
 
+        <!-- Upravená sekce Kalendář -->
         <section id="tab-calendar" class="app-tab">
             <header class="tab-header">
                 <h1>Tvoje Cesta</h1>
                 <p class="subtitle">Vizuální důkaz tvé vytrvalosti</p>
             </header>
             <div class="calendar-container">
-                <h3 id="calendar-month-year"></h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <button onclick="changeCalendarMonth(-1)" style="width: 40px; background: var(--bg-color); color: var(--text-main); font-size: 1.5rem; padding: 4px; border: 1px solid var(--border-color);">&lsaquo;</button>
+                    <h3 id="calendar-month-year" style="margin: 0; font-size: 1.2rem;"></h3>
+                    <button onclick="changeCalendarMonth(1)" style="width: 40px; background: var(--bg-color); color: var(--text-main); font-size: 1.5rem; padding: 4px; border: 1px solid var(--border-color);">&rsaquo;</button>
+                </div>
                 <div class="calendar-grid" id="calendar-grid"></div>
             </div>
             <div id="day-detail-container" class="hidden">

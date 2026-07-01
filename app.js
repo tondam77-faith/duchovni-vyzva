@@ -12,6 +12,7 @@ function getRealTodayString() {
 }
 
 let currentViewDateStr = getRealTodayString();
+let currentCalendarDate = new Date(); // Pamatuje si měsíc zobrazený v kalendáři
 
 function changeDate(offset) {
     const d = new Date(currentViewDateStr);
@@ -23,6 +24,11 @@ function changeDate(offset) {
 function resetDate() {
     currentViewDateStr = getRealTodayString();
     renderTodayView();
+}
+
+function changeCalendarMonth(offset) {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
+    renderCalendarView();
 }
 
 function loadData() {
@@ -41,7 +47,6 @@ function saveData(habits, logs) {
 function getHabitStreak(habit, logs, baseDateStr) {
     let streak = 0;
     
-    // Zkontrolujeme dnešek (zobrazený den)
     let todayLog = logs.find(l => l.date === baseDateStr);
     let todayDayOfWeek = new Date(baseDateStr).getDay();
     let isScheduledToday = !habit.daysOfWeek || habit.daysOfWeek.length === 0 || habit.daysOfWeek.includes(todayDayOfWeek);
@@ -50,7 +55,6 @@ function getHabitStreak(habit, logs, baseDateStr) {
         streak++;
     }
 
-    // Zpětně procházíme historii
     for (let i = 1; i <= 365; i++) {
         let pastD = new Date(baseDateStr);
         pastD.setDate(pastD.getDate() - i);
@@ -64,7 +68,7 @@ function getHabitStreak(habit, logs, baseDateStr) {
             if (pastLog && pastLog.completedHabitIds.includes(habit.id)) {
                 streak++;
             } else {
-                break; // Řetězec se přerušil
+                break;
             }
         }
     }
@@ -93,7 +97,6 @@ function renderTodayView() {
     
     document.getElementById('today-date').innerText = viewDate.toLocaleDateString('cs-CZ', options);
     
-    // Zobrazení tlačítka pro návrat do současnosti
     if (isRealToday) {
         document.getElementById('btn-reset-date').classList.add('hidden');
         document.getElementById('today-subtitle').classList.remove('hidden');
@@ -161,8 +164,6 @@ function renderTodayView() {
         });
     }
     
-    // Zobrazení večerního ztišení už nevyžaduje 100 % splnění celého dne
-    // Odemykáme po 18:00 nebo jakmile uživatel zapsal nějakou reflexi (na daný či minulý den)
     const isEvening = new Date().getHours() >= 18; 
     const reflectionSection = document.getElementById('reflection-section');
     
@@ -374,17 +375,18 @@ function renderCalendarView() {
     const grid = document.getElementById('calendar-grid');
     grid.innerHTML = '';
     
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
+    // Zde je změna pro listování kalendářem
+    const currentYear = currentCalendarDate.getFullYear();
+    const currentMonth = currentCalendarDate.getMonth();
     
-    const todayDate = new Date(currentYear, currentMonth, now.getDate());
+    const realToday = new Date();
+    const todayDate = new Date(realToday.getFullYear(), realToday.getMonth(), realToday.getDate());
     
     const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
     document.getElementById('calendar-month-year').innerText = `${monthNames[currentMonth]} ${currentYear}`;
     
-    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-    const startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+    let firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+    let startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
     const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
     
     for (let i = 0; i < startOffset; i++) {
