@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Následování</title>
     
-    <!-- Propojení s PWA Manifestem -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#27ae60">
     
-    <!-- Specifické značky pro Apple / iOS pro skrytí URL adresy -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,16 +21,21 @@
     <main id="app-content">
         
         <section id="tab-today" class="app-tab active">
-            <header class="tab-header">
-                <h1 id="today-date">Dnešní cesta</h1>
-                <p class="subtitle">Soustřeď se na přítomný okamžik</p>
+            <!-- Upravená hlavička se šipkami pro přesun v čase -->
+            <header class="tab-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <button onclick="changeDate(-1)" style="width: 40px; padding: 8px; background: transparent; color: var(--text-main); font-size: 1.8rem;">&lsaquo;</button>
+                <div style="text-align: center; flex-grow: 1;">
+                    <h1 id="today-date" style="font-size: 1.4rem; margin-bottom: 2px;">Dnešní cesta</h1>
+                    <button id="btn-reset-date" class="hidden" onclick="resetDate()" style="background: transparent; color: var(--color-modlitba); font-size: 0.85rem; padding: 0; width: auto; margin: 0 auto; text-decoration: underline;">Vrátit se na dnešek</button>
+                    <p class="subtitle" id="today-subtitle">Soustřeď se na přítomný okamžik</p>
+                </div>
+                <button onclick="changeDate(1)" style="width: 40px; padding: 8px; background: transparent; color: var(--text-main); font-size: 1.8rem;">&rsaquo;</button>
             </header>
             
-            <!-- Tlačítko pro Lectio Divina / Posvátný prostor -->
             <div class="card" style="background: var(--success-bg); border: 1px solid var(--success-color);">
                 <h3 style="margin-top:0; color:var(--text-main);">Lectio Divina</h3>
                 <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 12px;">Dnešní modlitba s Biblí na webu Posvátný prostor.</p>
-                <a href="https://sacredspace.com/cs/daily-prayer/" target="_blank" style="text-decoration:none;">
+                <a href="https://www.posvatnyprostor.cz/" target="_blank" style="text-decoration:none;">
                     <button style="background: var(--color-modlitba);">Otevřít zamyšlení</button>
                 </a>
             </div>
@@ -41,7 +44,7 @@
 
             <div id="reflection-section" class="hidden">
                 <h2>Večerní ztišení</h2>
-                <p class="reflection-intro">Pro dnešek máš splněno. Zastav se a ohlédni se za uplynulým dnem bez odsuzování.</p>
+                <p class="reflection-intro">Zastav se a ohlédni se za tímto dnem bez odsuzování.</p>
                 
                 <div class="input-group">
                     <label for="input-reflection">S čím jsem dnes bojoval?</label>
@@ -53,7 +56,7 @@
                     <textarea id="input-gratitude" rows="3" placeholder="Vykaž vděčnost..."></textarea>
                 </div>
                 
-                <button id="btn-save-day" onclick="saveTodayLog()">Uzavřít den s laskavostí</button>
+                <button id="btn-save-day" onclick="saveTodayLog()">Uložit reflexi</button>
             </div>
         </section>
 
@@ -143,7 +146,6 @@
     </nav>
 
     <script src="app.js"></script>
-    
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

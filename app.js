@@ -1,22 +1,28 @@
 // Inicializace
 if (!localStorage.getItem('exodus_habits')) {
-    const defaultHabits = [
-        { id: "1", name: "20 minut tiché modlitby", category: "modlitba", trigger: "Poté, co vstanu a umyji si obličej", isActive: true, daysOfWeek: [0,1,2,3,4,5,6] },
-        { id: "2", name: "Studená sprcha", category: "askeze", trigger: "Ihned po ranním cvičení", isActive: true, daysOfWeek: [0,1,2,3,4,5,6] },
-        { id: "3", name: "Páteční půst", category: "askeze", trigger: "Během celého pátku", isActive: true, daysOfWeek: [5] }
-    ];
-    localStorage.setItem('exodus_habits', JSON.stringify(defaultHabits));
+    localStorage.setItem('exodus_habits', JSON.stringify([]));
 }
 if (!localStorage.getItem('exodus_logs')) {
     localStorage.setItem('exodus_logs', JSON.stringify([]));
 }
 
-function getTodayString() {
+function getRealTodayString() {
     const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+let currentViewDateStr = getRealTodayString();
+
+function changeDate(offset) {
+    const d = new Date(currentViewDateStr);
+    d.setDate(d.getDate() + offset);
+    currentViewDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    renderTodayView();
+}
+
+function resetDate() {
+    currentViewDateStr = getRealTodayString();
+    renderTodayView();
 }
 
 function loadData() {
@@ -29,6 +35,40 @@ function loadData() {
 function saveData(habits, logs) {
     localStorage.setItem('exodus_habits', JSON.stringify(habits));
     localStorage.setItem('exodus_logs', JSON.stringify(logs));
+}
+
+// Funkce pro výpočet počtu úspěšných dní v řadě
+function getHabitStreak(habit, logs, baseDateStr) {
+    let streak = 0;
+    
+    // Zkontrolujeme dnešek (zobrazený den)
+    let todayLog = logs.find(l => l.date === baseDateStr);
+    let todayDayOfWeek = new Date(baseDateStr).getDay();
+    let isScheduledToday = !habit.daysOfWeek || habit.daysOfWeek.length === 0 || habit.daysOfWeek.includes(todayDayOfWeek);
+    
+    if (isScheduledToday && todayLog && todayLog.completedHabitIds.includes(habit.id)) {
+        streak++;
+    }
+
+    // Zpětně procházíme historii
+    for (let i = 1; i <= 365; i++) {
+        let pastD = new Date(baseDateStr);
+        pastD.setDate(pastD.getDate() - i);
+        let pastStr = `${pastD.getFullYear()}-${String(pastD.getMonth() + 1).padStart(2, '0')}-${String(pastD.getDate()).padStart(2, '0')}`;
+        let pastDayOfWeek = pastD.getDay();
+        
+        let isScheduled = !habit.daysOfWeek || habit.daysOfWeek.length === 0 || habit.daysOfWeek.includes(pastDayOfWeek);
+        
+        if (isScheduled) {
+            let pastLog = logs.find(l => l.date === pastStr);
+            if (pastLog && pastLog.completedHabitIds.includes(habit.id)) {
+                streak++;
+            } else {
+                break; // Řetězec se přerušil
+            }
+        }
+    }
+    return streak;
 }
 
 function switchTab(tabId) {
@@ -45,34 +85,46 @@ function switchTab(tabId) {
 
 function renderTodayView() {
     const { habits, logs } = loadData();
-    const todayStr = getTodayString();
-    const todayDayOfWeek = new Date().getDay();
+    const isRealToday = currentViewDateStr === getRealTodayString();
     
+    const viewDate = new Date(currentViewDateStr);
+    const viewDayOfWeek = viewDate.getDay();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('today-date').innerText = new Date().toLocaleDateString('cs-CZ', options);
     
-    // Rozdělení na dnešní a nepovinné aktivity
-    const scheduledHabits = habits.filter(h => h.isActive && (!h.daysOfWeek || h.daysOfWeek.length === 0 || h.daysOfWeek.includes(todayDayOfWeek)));
-    const unscheduledHabits = habits.filter(h => h.isActive && h.daysOfWeek && h.daysOfWeek.length > 0 && !h.daysOfWeek.includes(todayDayOfWeek));
+    document.getElementById('today-date').innerText = viewDate.toLocaleDateString('cs-CZ', options);
     
-    const todayLog = logs.find(l => l.date === todayStr) || { date: todayStr, completedHabitIds: [], eveningReflection: '', gratitude: '' };
+    // Zobrazení tlačítka pro návrat do současnosti
+    if (isRealToday) {
+        document.getElementById('btn-reset-date').classList.add('hidden');
+        document.getElementById('today-subtitle').classList.remove('hidden');
+    } else {
+        document.getElementById('btn-reset-date').classList.remove('hidden');
+        document.getElementById('today-subtitle').classList.add('hidden');
+    }
+
+    const scheduledHabits = habits.filter(h => h.isActive && (!h.daysOfWeek || h.daysOfWeek.length === 0 || h.daysOfWeek.includes(viewDayOfWeek)));
+    const unscheduledHabits = habits.filter(h => h.isActive && h.daysOfWeek && h.daysOfWeek.length > 0 && !h.daysOfWeek.includes(viewDayOfWeek));
+    
+    const currentLog = logs.find(l => l.date === currentViewDateStr) || { date: currentViewDateStr, completedHabitIds: [], eveningReflection: '', gratitude: '' };
     
     const container = document.getElementById('habits-list');
     container.innerHTML = '';
     
-    // 1. Vykreslení dnešních priorit
     if (scheduledHabits.length === 0) {
-        container.innerHTML = '<p class="subtitle" style="text-align:center; padding: 20px 0;">Pro dnešní den nemáš naplánovány žádné specifické návyky.</p>';
+        container.innerHTML = '<p class="subtitle" style="text-align:center; padding: 20px 0;">Pro tento den nemáš naplánovány žádné specifické návyky.</p>';
     } else {
         scheduledHabits.forEach(habit => {
-            const isDone = todayLog.completedHabitIds.includes(habit.id);
+            const isDone = currentLog.completedHabitIds.includes(habit.id);
+            const streak = getHabitStreak(habit, logs, currentViewDateStr);
+            const streakHtml = streak > 1 ? `<span style="font-size: 0.75rem; color: #e67e22; font-weight: bold; margin-left: 8px;">🔥 ${streak}x v řadě</span>` : '';
+
             const card = document.createElement('div');
             card.className = `habit-card cat-${habit.category} ${isDone ? 'done' : ''}`;
             
             card.innerHTML = `
                 <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleHabitToday('${habit.id}')">
                 <div class="habit-info">
-                    <p class="habit-title">${habit.name}</p>
+                    <p class="habit-title">${habit.name}${streakHtml}</p>
                     <p class="habit-trigger">${habit.trigger}</p>
                 </div>
             `;
@@ -80,7 +132,6 @@ function renderTodayView() {
         });
     }
 
-    // 2. Vykreslení aktivit navíc (vizuálně oddělených)
     if (unscheduledHabits.length > 0) {
         const extraHeader = document.createElement('h3');
         extraHeader.innerText = 'Aktivity navíc (nepovinné)';
@@ -91,7 +142,7 @@ function renderTodayView() {
         container.appendChild(extraHeader);
 
         unscheduledHabits.forEach(habit => {
-            const isDone = todayLog.completedHabitIds.includes(habit.id);
+            const isDone = currentLog.completedHabitIds.includes(habit.id);
             const card = document.createElement('div');
             
             card.className = `habit-card cat-${habit.category} ${isDone ? 'done' : ''}`;
@@ -110,18 +161,15 @@ function renderTodayView() {
         });
     }
     
-    // 3. Logika pro zobrazení večerního ztišení
-    const allScheduledDone = scheduledHabits.length > 0 && scheduledHabits.every(h => todayLog.completedHabitIds.includes(h.id));
-    
-    // Pokud chceš změnit čas odemčení, změň číslo 18 na jiné (např. 20 pro 20:00)
+    // Zobrazení večerního ztišení už nevyžaduje 100 % splnění celého dne
+    // Odemykáme po 18:00 nebo jakmile uživatel zapsal nějakou reflexi (na daný či minulý den)
     const isEvening = new Date().getHours() >= 18; 
-    
     const reflectionSection = document.getElementById('reflection-section');
     
-    if (allScheduledDone || isEvening || todayLog.eveningReflection || todayLog.gratitude) {
+    if (isEvening || currentLog.eveningReflection || currentLog.gratitude || !isRealToday) {
         reflectionSection.classList.remove('hidden');
-        document.getElementById('input-reflection').value = todayLog.eveningReflection || '';
-        document.getElementById('input-gratitude').value = todayLog.gratitude || '';
+        document.getElementById('input-reflection').value = currentLog.eveningReflection || '';
+        document.getElementById('input-gratitude').value = currentLog.gratitude || '';
     } else {
         reflectionSection.classList.add('hidden');
     }
@@ -129,15 +177,14 @@ function renderTodayView() {
 
 function toggleHabitToday(habitId) {
     const { habits, logs } = loadData();
-    const todayStr = getTodayString();
     
-    let todayLogIndex = logs.findIndex(l => l.date === todayStr);
-    if (todayLogIndex === -1) {
-        logs.push({ date: todayStr, completedHabitIds: [], eveningReflection: '', gratitude: '' });
-        todayLogIndex = logs.length - 1;
+    let currentLogIndex = logs.findIndex(l => l.date === currentViewDateStr);
+    if (currentLogIndex === -1) {
+        logs.push({ date: currentViewDateStr, completedHabitIds: [], eveningReflection: '', gratitude: '' });
+        currentLogIndex = logs.length - 1;
     }
     
-    const completedIds = logs[todayLogIndex].completedHabitIds;
+    const completedIds = logs[currentLogIndex].completedHabitIds;
     const idIndex = completedIds.indexOf(habitId);
     
     if (idIndex === -1) {
@@ -152,16 +199,18 @@ function toggleHabitToday(habitId) {
 
 function saveTodayLog() {
     const { habits, logs } = loadData();
-    const todayStr = getTodayString();
     
-    const todayLogIndex = logs.findIndex(l => l.date === todayStr);
-    if (todayLogIndex !== -1) {
-        logs[todayLogIndex].eveningReflection = document.getElementById('input-reflection').value;
-        logs[todayLogIndex].gratitude = document.getElementById('input-gratitude').value;
+    let currentLogIndex = logs.findIndex(l => l.date === currentViewDateStr);
+    if (currentLogIndex === -1) {
+        logs.push({ date: currentViewDateStr, completedHabitIds: [], eveningReflection: '', gratitude: '' });
+        currentLogIndex = logs.length - 1;
     }
     
+    logs[currentLogIndex].eveningReflection = document.getElementById('input-reflection').value;
+    logs[currentLogIndex].gratitude = document.getElementById('input-gratitude').value;
+    
     saveData(habits, logs);
-    alert('Tvá večerní reflexe byla laskavě uložena. Dobrou noc!');
+    alert('Tvá večerní reflexe byla laskavě uložena.');
 }
 
 let editingHabitId = null;
@@ -291,7 +340,7 @@ function exportData() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "nasledovani_zaloha_" + getTodayString() + ".json");
+    downloadAnchorNode.setAttribute("download", "nasledovani_zaloha_" + getRealTodayString() + ".json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
@@ -350,7 +399,6 @@ function renderCalendarView() {
         const checkDate = new Date(currentYear, currentMonth, day);
         const checkDayOfWeek = checkDate.getDay();
         
-        // Zde hlídáme, kolik POVINNÝCH návyků bylo na tento den určeno
         const scheduledHabits = habits.filter(h => h.isActive && (!h.daysOfWeek || h.daysOfWeek.length === 0 || h.daysOfWeek.includes(checkDayOfWeek)));
         const expectedIds = scheduledHabits.map(h => h.id);
         
@@ -362,7 +410,6 @@ function renderCalendarView() {
             dayBox.classList.add('future-day');
         } else {
             if (log && (log.completedHabitIds.length > 0 || log.eveningReflection)) {
-                // Zjišťujeme, kolik z povinných bylo skutečně odškrtnuto
                 const completedExpectedCount = log.completedHabitIds.filter(id => expectedIds.includes(id)).length;
                 
                 if (completedExpectedCount >= scheduledHabits.length || log.eveningReflection) {
@@ -399,7 +446,6 @@ function showDayDetail(dateStr) {
     
     const completedIds = log ? log.completedHabitIds : [];
     
-    // Zohledníme návyky plánované na daný den + ty nepovinné, které byly splněny jako bonus
     const habitsToShow = habits.filter(h => {
         if (!h.isActive && !completedIds.includes(h.id)) return false; 
         const isScheduled = !h.daysOfWeek || h.daysOfWeek.length === 0 || h.daysOfWeek.includes(checkDayOfWeek);
@@ -428,7 +474,6 @@ function showDayDetail(dateStr) {
         habitsDiv.innerHTML += '<p style="color:var(--text-muted); font-style:italic; margin:4px 0;">V tento den nebyl splněn žádný návyk.</p>';
     }
     
-    // Zobrazíme i to, co nevyšlo (ale jen z těch povinných pro daný den)
     const scheduledNotCompleted = habitsToShow.filter(h => 
         (!h.daysOfWeek || h.daysOfWeek.length === 0 || h.daysOfWeek.includes(checkDayOfWeek)) && 
         !completedIds.includes(h.id)
