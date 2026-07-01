@@ -326,8 +326,19 @@ function saveHabit() {
 function toggleHabitStatus(habitId) {
     const { habits, logs } = loadData();
     const habit = habits.find(h => h.id === habitId);
+    
     if (habit) {
-        habit.isActive = !habit.isActive;
+        // Pokud návyk aktivujeme z režimu spánku
+        if (!habit.isActive) {
+            habit.isActive = true;
+            // "Odpouštějící varianta": Posuneme datum zrození na dnešek, 
+            // aby se pro minulé dny nejevil jako nesplněný
+            habit.createdAt = getRealTodayString();
+        } else {
+            // Uspání návyku
+            habit.isActive = false;
+        }
+        
         saveData(habits, logs);
         renderSettingsView();
     }
